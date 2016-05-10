@@ -18,6 +18,9 @@ $(document).ready(function(){
 	$('.one_star').val( localStorage.zn_one_star );
 
 
+	$('input').change(function(){
+		$( '#rating_form' ).trigger('submit');
+	});
 	$( '#rating_form' ).submit( function(e){
 
 		e.preventDefault();
@@ -29,17 +32,44 @@ $(document).ready(function(){
 		var one_star = parseInt(  $('.one_star').val() ) || 0;
 
 		var total = ( ( five_star * 5 ) + ( four_star * 4 ) + ( three_star * 3 ) + ( two_star * 2 ) + ( one_star * 1 ) ) / ( five_star + four_star + three_star + two_star + one_star );
+		var total_ratings = ( five_star * 5 ) + ( four_star * 4 ) + ( three_star * 3 ) + ( two_star * 2 ) + ( one_star * 1 );
+		var found_ratings = five_star + four_star + three_star + two_star + one_star;
 
-		$('.total').html( 'Your total rating value is ' + precise_round( total, 2) );
+		// var percentage5 = ;
+		$('.rating5').text( precise_round( five_star / found_ratings * 100, 2) + '%' );
+		$('.rating4').text( precise_round( four_star / found_ratings * 100, 2) + '%' );
+		$('.rating3').text( precise_round( three_star / found_ratings * 100, 2) + '%' );
+		$('.rating2').text( precise_round( two_star / found_ratings * 100, 2) + '%' );
+		$('.rating1').text( precise_round( one_star / found_ratings * 100, 2) + '%' );
+
+
+		// Calculate how many ratings we need
+		var current_average = precise_round( total, 2) > 0 ? precise_round( total, 2) : 5;
+		var next_average = parseFloat(current_average) + 0.01;
+			next_average = next_average > 5 ? 5 : next_average;
+		var needed_ratings = 1;
+
+		while(true){
+			var new_rating = ( total_ratings + (5 * needed_ratings) ) / ( found_ratings + needed_ratings );
+			new_rating = precise_round( new_rating, 2 );
+
+			if( new_rating >= next_average ){
+				break;
+			}
+			needed_ratings++;
+		}
+
+		$('.total').html( 'Your total rating value is ' + current_average );
+		$('.total_needed').html( 'You will need '+needed_ratings+' extra more 5 stars ratings to reach ' + next_average );
 
 		// save the data
 		if(typeof(Storage) !== "undefined") {
-	    	// Code for localStorage/sessionStorage.
-	    	localStorage.setItem("zn_five_stars", five_star);
-	    	localStorage.setItem("zn_four_star", four_star);
-	    	localStorage.setItem("zn_three_star", three_star);
-	    	localStorage.setItem("zn_two_star", two_star);
-	    	localStorage.setItem("zn_one_star", one_star);
+			// Code for localStorage/sessionStorage.
+			localStorage.setItem("zn_five_stars", five_star);
+			localStorage.setItem("zn_four_star", four_star);
+			localStorage.setItem("zn_three_star", three_star);
+			localStorage.setItem("zn_two_star", two_star);
+			localStorage.setItem("zn_one_star", one_star);
 		}
 
 	}).trigger('submit');
